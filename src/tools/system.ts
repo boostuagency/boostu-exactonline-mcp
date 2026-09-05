@@ -9,11 +9,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { ExactClient } from "../api/client.js";
-import type { ODataCollection, Me } from "../types/index.js";
+import { collectionRows, type ODataCollection, type Me } from "../types/index.js";
+
+/** Properties exact_me asks current/Me for. Exported so the select validator covers it. */
+export const ME_SELECT = "UserID,FullName,Email,LanguageCode,CurrentDivision,AccountingDivision,ServerTime,PackageCode";
 import { respond, respondError } from "../lib/respond.js";
 import { isReadOnly, registerResources, type ResourceDef } from "../lib/registerResource.js";
 
-const RESOURCES: ResourceDef[] = [
+export const RESOURCES: ResourceDef[] = [
   {
     name: "divisions",
     resource: "system/Divisions",
@@ -21,7 +24,7 @@ const RESOURCES: ResourceDef[] = [
     key: "Code",
     keyType: "number",
     ops: ["list"],
-    defaultSelect: "Code,Description,Country,Currency,HID,Main,BlockingStatus",
+    defaultSelect: "Code,Description,Country,Currency,Hid,IsMainDivision,Current,BlockingStatus",
     filterHint: "Each division is one company's bookkeeping. Use the Code as the 'division' argument on other tools.",
   },
   {
@@ -31,7 +34,7 @@ const RESOURCES: ResourceDef[] = [
     key: "Code",
     keyType: "number",
     ops: ["list"],
-    defaultSelect: "Code,Description,Country,Currency,HID,Main",
+    defaultSelect: "Code,Description,Country,Currency,Hid,IsMainDivision",
   },
   {
     name: "available_features",
@@ -67,11 +70,9 @@ export function registerSystemTools(server: McpServer, client: ExactClient): voi
         const res = await client.request<ODataCollection<Me>>({
           resource: "current/Me",
           divisionless: true,
-          params: {
-            $select: "UserID,FullName,Email,Language,CurrentDivision,ServerTime,ThreadId",
-          },
+          params: { $select: ME_SELECT },
         });
-        const me = res.d?.results?.[0];
+        const me = collectionRows(res)[0];
         if (!me) return respondError("Exact Online returned no user for current/Me.");
         return respond({
           ...me,

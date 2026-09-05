@@ -54,8 +54,12 @@ export interface ResourceDef {
   filterHint?: string;
 }
 
-/** Default page size. Exact caps normal endpoints at 60 records per page. */
-const DEFAULT_TOP = 60;
+/**
+ * Page size Exact applies itself when no $top is sent. It is not sent as a
+ * default: with $top Exact returns a bare array and no __next, so server-side
+ * paging (next_skiptoken) only works when the caller leaves top out.
+ */
+const EXACT_PAGE_SIZE = 60;
 
 const divisionParam = z
   .number()
@@ -82,8 +86,8 @@ export function registerResource(server: McpServer, client: ExactClient, def: Re
         (keyed
           ? `Pass 'id' to fetch one record by its ${key} with all properties instead. `
           : "") +
-        "Results are paged; when the response carries next_skiptoken, pass it back as 'skiptoken' " +
-        "for the next page." +
+        `Results are paged ${EXACT_PAGE_SIZE} at a time; when the response carries next_skiptoken, pass it back as ` +
+        "'skiptoken' for the next page. Pass 'top' only to cap a one-off result: it disables paging." +
         (def.filterHint ? ` ${def.filterHint}` : ""),
       {
         ...(keyed
@@ -112,7 +116,7 @@ export function registerResource(server: McpServer, client: ExactClient, def: Re
           .number()
           .int()
           .optional()
-          .describe(`Maximum records to return (default ${DEFAULT_TOP}; Exact pages at 60 for most endpoints)`),
+          .describe(`Cap on records for a single un-paged answer. Leave out to page through everything ${EXACT_PAGE_SIZE} at a time.`),
         orderby: z.string().optional().describe("OData $orderby, e.g. \"InvoiceDate desc\""),
         expand: z
           .string()
@@ -134,7 +138,7 @@ export function registerResource(server: McpServer, client: ExactClient, def: Re
               {
                 filter: p.filter,
                 select: p.select ?? def.defaultSelect,
-                top: p.top ?? DEFAULT_TOP,
+                top: p.top,
                 orderby: p.orderby,
                 expand: p.expand,
                 skiptoken: p.skiptoken,

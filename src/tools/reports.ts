@@ -13,7 +13,7 @@ import type { ExactClient } from "../api/client.js";
 import { respond, respondError } from "../lib/respond.js";
 import { registerResources, type ResourceDef } from "../lib/registerResource.js";
 
-const RESOURCES: ResourceDef[] = [
+export const RESOURCES: ResourceDef[] = [
   {
     name: "receivables",
     resource: "read/financial/ReceivablesList",
@@ -21,8 +21,8 @@ const RESOURCES: ResourceDef[] = [
     ops: ["list"],
     keyed: false,
     defaultSelect:
-      "HID,AccountCode,AccountName,InvoiceNumber,YourRef,Description,InvoiceDate,DueDate," +
-      "Amount,AmountInTransit,Currency,JournalCode,EntryNumber,Status",
+      "HID,AccountId,AccountCode,AccountName,InvoiceNumber,YourRef,Description,InvoiceDate,DueDate," +
+      "Amount,AmountInTransit,CurrencyCode,JournalCode,JournalDescription,EntryNumber",
     filterHint:
       "Everything a customer still owes. Overdue only: \"DueDate lt datetime'2026-09-02'\". " +
       "Amount is what is still open, not the invoice total.",
@@ -34,8 +34,8 @@ const RESOURCES: ResourceDef[] = [
     ops: ["list"],
     keyed: false,
     defaultSelect:
-      "HID,AccountCode,AccountName,InvoiceNumber,YourRef,Description,InvoiceDate,DueDate," +
-      "Amount,AmountInTransit,Currency,JournalCode,EntryNumber,Status",
+      "HID,AccountId,AccountCode,AccountName,InvoiceNumber,YourRef,Description,InvoiceDate,DueDate," +
+      "Amount,AmountInTransit,CurrencyCode,JournalCode,JournalDescription,EntryNumber,ApprovalStatus",
     filterHint: "Everything still owed to suppliers. Use it to plan payment runs.",
   },
   {
@@ -83,8 +83,9 @@ const RESOURCES: ResourceDef[] = [
     ops: ["list"],
     keyed: false,
     defaultSelect:
-      "CurrentYear,PreviousYear,CurrentYearAmount,PreviousYearAmount,CurrentYearCosts," +
-      "PreviousYearCosts,CurrentYearRevenue,PreviousYearRevenue,ResultCurrentYear,ResultPreviousYear",
+      "CurrentYear,PreviousYear,CurrentPeriod,CurrencyCode,RevenueCurrentYear,RevenuePreviousYear," +
+      "CostsCurrentYear,CostsPreviousYear,ResultCurrentYear,ResultPreviousYear," +
+      "RevenueCurrentPeriod,CostsCurrentPeriod,ResultCurrentPeriod",
     filterHint: "A year-to-date profit and loss summary with the prior year alongside it.",
   },
   {
@@ -113,6 +114,10 @@ const RESOURCES: ResourceDef[] = [
   },
 ];
 
+/** Properties exact_overdue_receivables asks ReceivablesList for. Exported so the select validator covers it. */
+export const OVERDUE_SELECT =
+  "HID,AccountId,AccountCode,AccountName,InvoiceNumber,YourRef,Description,InvoiceDate,DueDate,Amount,CurrencyCode";
+
 export function registerReportTools(server: McpServer, client: ExactClient): void {
   registerResources(server, client, RESOURCES);
 
@@ -139,8 +144,7 @@ export function registerReportTools(server: McpServer, client: ExactClient): voi
           "read/financial/ReceivablesList",
           {
             filter: `DueDate lt datetime'${asOf}T00:00:00'`,
-            select:
-              "HID,AccountCode,AccountName,InvoiceNumber,YourRef,Description,InvoiceDate,DueDate,Amount,Currency",
+            select: OVERDUE_SELECT,
             orderby: "DueDate asc",
             top: p.top ?? 60,
           },

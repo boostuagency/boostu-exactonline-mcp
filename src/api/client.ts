@@ -8,12 +8,14 @@
  */
 
 import type { ExactAuth } from "./auth.js";
-import type {
-  ListResult,
-  Me,
-  ODataCollection,
-  ODataEntity,
-  RateLimitSnapshot,
+import {
+  collectionMeta,
+  collectionRows,
+  type ListResult,
+  type Me,
+  type ODataCollection,
+  type ODataEntity,
+  type RateLimitSnapshot,
 } from "../types/index.js";
 import { buildQuery, keySegment, skiptokenFrom, type ODataQuery } from "../lib/odata.js";
 
@@ -66,7 +68,7 @@ export class ExactClient {
         params: { $select: "CurrentDivision,UserID,FullName,Email" },
       })
         .then((res) => {
-          const division = res.d?.results?.[0]?.CurrentDivision;
+          const division = collectionRows(res)[0]?.CurrentDivision;
           if (!division) {
             throw new Error(
               "Could not determine the current division from current/Me. " +
@@ -133,10 +135,13 @@ export class ExactClient {
       params: buildQuery(query),
       division,
     });
-    const out: ListResult<T> = { data: res.d?.results ?? [] };
-    const count = Number(res.d?.__count);
-    if (Number.isFinite(count)) out.count = count;
-    const skiptoken = skiptokenFrom(res.d?.__next);
+    // With $top Exact answers a bare array and never pages; without it the
+    // object shape with __next. Read both.
+    const out: ListResult<T> = { data: collectionRows(res) };
+    const meta = collectionMeta(res);
+    const count = Number(meta.count);
+    if (meta.count !== undefined && Number.isFinite(count)) out.count = count;
+    const skiptoken = skiptokenFrom(meta.next);
     if (skiptoken) out.next_skiptoken = skiptoken;
     return out;
   }

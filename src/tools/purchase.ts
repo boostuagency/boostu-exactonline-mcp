@@ -11,7 +11,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ExactClient } from "../api/client.js";
 import { registerResources, type ResourceDef } from "../lib/registerResource.js";
 
-const RESOURCES: ResourceDef[] = [
+export const RESOURCES: ResourceDef[] = [
   {
     name: "purchase_entries",
     resource: "purchaseentry/PurchaseEntries",

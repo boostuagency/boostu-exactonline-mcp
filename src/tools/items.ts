@@ -9,7 +9,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ExactClient } from "../api/client.js";
 import { registerResources, type ResourceDef } from "../lib/registerResource.js";
 
-const RESOURCES: ResourceDef[] = [
+export const RESOURCES: ResourceDef[] = [
   {
     name: "items",
     resource: "logistics/Items",
@@ -18,8 +18,8 @@ const RESOURCES: ResourceDef[] = [
     deletable: true,
     defaultSelect:
       "ID,Code,Description,ItemGroup,ItemGroupCode,ItemGroupDescription,CostPriceStandard," +
-      "SalesVatCode,PurchaseVatCode,Unit,UnitDescription,IsSalesItem,IsPurchaseItem,IsStockItem," +
-      "IsWebshopItem,IsSerialItem,GLRevenue,GLCosts,Barcode,IsBlocked,Created,Modified",
+      "StandardSalesPrice,SalesVatCode,Unit,UnitDescription,IsSalesItem,IsPurchaseItem,IsStockItem," +
+      "IsWebshopItem,IsSerialItem,GLRevenue,GLRevenueCode,GLCosts,GLCostsCode,Barcode,EndDate,Created,Modified",
     commonFields:
       "Code (required), Description (required), ItemGroup (GUID), Unit, SalesVatCode, PurchaseVatCode, " +
       "CostPriceStandard, IsSalesItem, IsPurchaseItem, IsStockItem, GLRevenue, GLCosts",
@@ -43,7 +43,7 @@ const RESOURCES: ResourceDef[] = [
     deletable: true,
     defaultSelect:
       "ID,Item,ItemCode,ItemDescription,Account,AccountName,Price,Currency,Quantity,Unit," +
-      "StartDate,EndDate,PriceList,PriceListDescription,NumberOfItemsPerUnit",
+      "UnitDescription,StartDate,EndDate,NumberOfItemsPerUnit",
     commonFields: "Item (GUID, required), Price (required), Currency, Quantity, StartDate, EndDate, Account, PriceList",
     filterHint: "A price scoped to an Account is that customer's own price. Filter with \"Item eq guid'...'\".",
   },
@@ -52,7 +52,7 @@ const RESOURCES: ResourceDef[] = [
     resource: "sales/SalesPriceLists",
     label: "sales price lists",
     ops: ["list", "create", "update"],
-    defaultSelect: "ID,Code,Description,Currency,StartDate,EndDate,Main,Active",
+    defaultSelect: "ID,Code,Description,Currency,Created,Modified",
     commonFields: "Code (required), Description (required), Currency, StartDate, EndDate",
   },
   {

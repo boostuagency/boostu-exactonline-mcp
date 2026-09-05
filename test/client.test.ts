@@ -80,6 +80,31 @@ describe("ExactClient", () => {
     expect(result.next_skiptoken).toBe(`guid'${GUID}'`);
   });
 
+  it("reads the bare-array shape Exact returns when $top is sent", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ d: [{ ID: GUID }, { ID: GUID }] })));
+    const client = new ExactClient(fakeAuth(), { division: 1 });
+    const result = await client.list("crm/Accounts", { top: 2 });
+    expect(result.data).toHaveLength(2);
+    expect(result.count).toBeUndefined();
+    expect(result.next_skiptoken).toBeUndefined();
+  });
+
+  it("returns an empty list for an empty bare array", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ d: [] })));
+    const client = new ExactClient(fakeAuth(), { division: 1 });
+    expect((await client.list("crm/Accounts", { top: 1 })).data).toEqual([]);
+  });
+
+  it("resolves the division from the bare-array shape of current/Me too", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({ d: [{ CurrentDivision: 77 }] }))
+      .mockResolvedValueOnce(jsonResponse({ d: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new ExactClient(fakeAuth());
+    await client.list("crm/Accounts", { top: 1 });
+    expect(new URL(fetchMock.mock.calls[1][0]).pathname).toBe("/api/v1/77/crm/Accounts");
+  });
+
   it("unwraps a single entity from the d envelope", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ d: { ID: GUID, Name: "Acme" } }));
     vi.stubGlobal("fetch", fetchMock);

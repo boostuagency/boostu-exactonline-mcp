@@ -36,13 +36,36 @@ export interface TokenResponse {
 
 // ─── OData envelopes ─────────────────────────────────────────────────────────
 
+/**
+ * A collection response. Exact uses two shapes: with $top in the query it
+ * answers `{ "d": [ ...rows ] }` (a bare array, never paged); without $top it
+ * answers `{ "d": { "results": [...], "__next": "...$skiptoken=..." } }` and
+ * pages server-side. Use collectionRows() and collectionMeta() rather than
+ * reading `d` directly.
+ */
 export interface ODataCollection<T> {
-  d: {
-    results: T[];
-    /** Absolute URL of the next page; carries the $skiptoken. */
-    __next?: string;
-    __count?: string;
-  };
+  d:
+    | T[]
+    | {
+        results: T[];
+        /** Absolute URL of the next page; carries the $skiptoken. */
+        __next?: string;
+        __count?: string;
+      };
+}
+
+/** The rows of a collection response, whichever shape Exact chose. */
+export function collectionRows<T>(body: ODataCollection<T> | undefined | null): T[] {
+  const d = body?.d;
+  if (Array.isArray(d)) return d;
+  return d?.results ?? [];
+}
+
+/** The paging metadata, present only on the object shape. */
+export function collectionMeta<T>(body: ODataCollection<T> | undefined | null): { next?: string; count?: string } {
+  const d = body?.d;
+  if (!d || Array.isArray(d)) return {};
+  return { next: d.__next, count: d.__count };
 }
 
 export interface ODataEntity<T> {

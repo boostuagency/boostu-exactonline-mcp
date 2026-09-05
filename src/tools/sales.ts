@@ -12,7 +12,7 @@ import type { ExactClient } from "../api/client.js";
 import { respond, respondError } from "../lib/respond.js";
 import { isReadOnly, registerResources, type ResourceDef } from "../lib/registerResource.js";
 
-const RESOURCES: ResourceDef[] = [
+export const RESOURCES: ResourceDef[] = [
   {
     name: "quotations",
     resource: "crm/Quotations",
@@ -38,7 +38,7 @@ const RESOURCES: ResourceDef[] = [
     deletable: true,
     defaultSelect:
       "ID,QuotationID,LineNumber,Item,ItemDescription,Description,Quantity,UnitCode,NetPrice," +
-      "AmountDC,VATCode,VATAmountDC",
+      "AmountDC,VATCode,VATAmountFC",
     commonFields: "QuotationID (GUID, required), Item (GUID), Quantity, NetPrice, Description, VATCode",
     filterHint: "Filter to one quotation with \"QuotationID eq guid'...'\".",
   },
@@ -103,8 +103,8 @@ const RESOURCES: ResourceDef[] = [
     ops: ["list", "create", "update"],
     deletable: true,
     defaultSelect:
-      "ID,InvoiceID,LineNumber,Item,ItemDescription,Description,Quantity,UnitCode,NetPrice," +
-      "AmountDC,VATCode,VATPercentage,VATAmountDC,GLAccount,GLAccountCode,CostCenter,Project",
+      "ID,InvoiceID,LineNumber,Item,ItemCode,ItemDescription,Description,Quantity,UnitCode,NetPrice," +
+      "AmountDC,VATCode,VATPercentage,VATAmountDC,GLAccount,GLAccountDescription,CostCenter,Project",
     commonFields:
       "InvoiceID (GUID, required), Item (GUID), Quantity, NetPrice, Description, VATCode, GLAccount, Project",
     filterHint: "Filter to one invoice with \"InvoiceID eq guid'...'\".",
