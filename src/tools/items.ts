@@ -52,7 +52,7 @@ export const RESOURCES: ResourceDef[] = [
     resource: "sales/SalesPriceLists",
     label: "sales price lists",
     ops: ["list", "create", "update"],
-    defaultSelect: "ID,Code,Description,Currency,StartDate,EndDate,Main,Active",
+    defaultSelect: "ID,Code,Description,Currency,Created,Modified",
     commonFields: "Code (required), Description (required), Currency, StartDate, EndDate",
   },
   {

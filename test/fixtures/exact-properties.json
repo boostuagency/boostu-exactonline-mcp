@@ -1,10 +1,18 @@
 {
- "$comment": "Property names observed on the live Exact Online API: one GET <resource>?$top=1 without $select per resource, keys of the first row minus __metadata. Regenerate with `npm run validate:selects -- --live --write-fixture` against an administration that has rows in these collections. Unverified resources could not be observed there; add them when a suitable administration is available.",
+ "$comment": "Property names confirmed on the live Exact Online API. For most resources: one GET <resource>?$top=1 without $select, keys of the first row minus __metadata. For the resources under source.probed the collection was empty, so the names were confirmed by sending them in $select: Exact rejects an unknown name with 400 even on an empty collection, so an accepted select proves every name in it. Regenerate with `npm run validate:selects -- --live --write-fixture`. Unverified resources answered 403 (module not licensed) there; add them when a suitable administration is available.",
  "source": {
   "region": "be",
   "division": 413770,
   "observed": "2026-09-05",
-  "method": "live rows"
+  "method": "live rows; $select probes for the resources under probed",
+  "probed": [
+   "crm/AccountClassifications",
+   "crm/Quotations",
+   "crm/QuotationLines",
+   "cashflow/DirectDebitMandates",
+   "sales/SalesPriceLists",
+   "documents/DocumentFolders"
+  ]
  },
  "verified": {
   "current/Me": [
@@ -2006,15 +2014,72 @@
    "GLAccount",
    "PrivateUsePercentage",
    "VATNonDeductiblePercentage"
+  ],
+  "crm/AccountClassifications": [
+   "ID",
+   "Code",
+   "Description",
+   "AccountClassificationName"
+  ],
+  "crm/Quotations": [
+   "QuotationID",
+   "QuotationNumber",
+   "VersionNumber",
+   "OrderAccount",
+   "OrderAccountName",
+   "Description",
+   "QuotationDate",
+   "DueDate",
+   "Status",
+   "StatusDescription",
+   "AmountDC",
+   "Currency",
+   "Created",
+   "Modified"
+  ],
+  "crm/QuotationLines": [
+   "ID",
+   "QuotationID",
+   "LineNumber",
+   "Item",
+   "ItemDescription",
+   "Description",
+   "Quantity",
+   "UnitCode",
+   "NetPrice",
+   "AmountDC",
+   "VATCode",
+   "VATAmountFC"
+  ],
+  "cashflow/DirectDebitMandates": [
+   "ID",
+   "Reference",
+   "Account",
+   "BankAccount",
+   "SignatureDate",
+   "Type",
+   "Description",
+   "FirstSend",
+   "Main",
+   "PaymentType"
+  ],
+  "sales/SalesPriceLists": [
+   "ID",
+   "Code",
+   "Description",
+   "Currency",
+   "Created",
+   "Modified"
+  ],
+  "documents/DocumentFolders": [
+   "ID",
+   "Description",
+   "ParentFolder",
+   "Created",
+   "Modified"
   ]
  },
  "unverified": {
-  "crm/AccountClassifications": "no rows in the reference administration",
-  "crm/Quotations": "no rows in the reference administration",
-  "crm/QuotationLines": "no rows in the reference administration",
-  "cashflow/DirectDebitMandates": "no rows in the reference administration",
-  "documents/DocumentFolders": "no rows in the reference administration",
-  "sales/SalesPriceLists": "no rows in the reference administration",
   "system/AccountantInfo": "no rows in the reference administration",
   "salesorder/SalesOrders": "403: module not licensed in the reference administration",
   "salesorder/SalesOrderLines": "403: module not licensed in the reference administration",

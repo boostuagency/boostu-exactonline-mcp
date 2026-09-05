@@ -111,3 +111,14 @@ export function propertiesFromMetadata(edmx: string): Record<string, string[]> {
 export function entitySetName(resource: string): string {
   return resource.split("/").filter(Boolean).pop()!;
 }
+
+/**
+ * The property name Exact complains about in a 400 response to a bad $select,
+ * e.g. "Type 'Exact.Web.Api.Models.Account' does not have a property named 'Foo'.".
+ * Exact names one unknown property per response, so callers strip it and retry
+ * to find the rest. This check works on empty collections too, which a row
+ * sample cannot cover.
+ */
+export function unknownPropertyFrom(message: string): string | undefined {
+  return message.match(/does not have a property named '([^']+)'/)?.[1];
+}

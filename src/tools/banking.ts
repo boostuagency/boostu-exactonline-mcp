@@ -99,7 +99,7 @@ export const RESOURCES: ResourceDef[] = [
     label: "SEPA direct debit mandates given by customers",
     ops: ["list", "create", "update"],
     defaultSelect:
-      "ID,Reference,Account,AccountName,BankAccount,SignatureDate,Type,Status,FirstOrRecurring,Description",
+      "ID,Reference,Account,BankAccount,SignatureDate,Type,PaymentType,FirstSend,Main,Description",
     commonFields: "Account (relation GUID), BankAccount (IBAN), Reference, SignatureDate, Type",
   },
 ];

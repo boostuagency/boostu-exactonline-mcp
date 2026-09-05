@@ -64,7 +64,7 @@ export const RESOURCES: ResourceDef[] = [
     resource: "documents/DocumentFolders",
     label: "the folder tree documents are filed in",
     ops: ["list"],
-    defaultSelect: "ID,Description,ParentID,FullPath",
+    defaultSelect: "ID,Description,ParentFolder,Created,Modified",
   },
 ];
 

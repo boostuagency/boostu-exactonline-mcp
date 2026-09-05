@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import {
   ALL_RESOURCES, collectSelectUsages, entitySetName, propertiesFromMetadata,
-  propertyNamesFromRow, splitSelect, validateSelects,
+  propertyNamesFromRow, splitSelect, unknownPropertyFrom, validateSelects,
 } from "../src/lib/selectValidation.js";
 
 const fixture = JSON.parse(readFileSync(new URL("./fixtures/exact-properties.json", import.meta.url), "utf8")) as {
@@ -45,6 +45,14 @@ describe("default selects against the observed Exact properties", () => {
     }
     expect(by.exact_transaction_lines_list).not.toContain("AmountVATDC");
     expect(by.exact_transaction_lines_list).toContain("AmountVATFC");
+    // Empty collections in the reference administration, confirmed through $select probes.
+    expect(by.exact_quotation_lines_list).toContain("VATAmountFC");
+    expect(by.exact_quotation_lines_list).not.toContain("VATAmountDC");
+    for (const gone of ["AccountName", "Status", "FirstOrRecurring"]) expect(by.exact_direct_debit_mandates_list).not.toContain(gone);
+    expect(by.exact_direct_debit_mandates_list).toContain("PaymentType");
+    for (const gone of ["StartDate", "EndDate", "Main", "Active"]) expect(by.exact_sales_price_lists_list).not.toContain(gone);
+    for (const gone of ["ParentID", "FullPath"]) expect(by.exact_document_folders_list).not.toContain(gone);
+    expect(by.exact_document_folders_list).toContain("ParentFolder");
   });
 
   it("every resource in the server is either verified or explained", () => {
@@ -56,6 +64,11 @@ describe("default selects against the observed Exact properties", () => {
 });
 
 describe("property extraction", () => {
+  it("reads the offending property out of Exact's 400 message", () => {
+    expect(unknownPropertyFrom("Type 'Exact.Web.Api.Models.CRM.QuotationLine' does not have a property named 'VATAmountDC'..")).toBe("VATAmountDC");
+    expect(unknownPropertyFrom("Forbidden")).toBeUndefined();
+  });
+
   it("drops __metadata and deferred navigation links from a live row", () => {
     expect(propertyNamesFromRow({
       __metadata: { uri: "x" }, ID: "1", Notes: { __deferred: { uri: "y" } }, Amount: 3, Empty: null,

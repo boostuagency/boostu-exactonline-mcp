@@ -38,7 +38,7 @@ export const RESOURCES: ResourceDef[] = [
     deletable: true,
     defaultSelect:
       "ID,QuotationID,LineNumber,Item,ItemDescription,Description,Quantity,UnitCode,NetPrice," +
-      "AmountDC,VATCode,VATAmountDC",
+      "AmountDC,VATCode,VATAmountFC",
     commonFields: "QuotationID (GUID, required), Item (GUID), Quantity, NetPrice, Description, VATCode",
     filterHint: "Filter to one quotation with \"QuotationID eq guid'...'\".",
   },
