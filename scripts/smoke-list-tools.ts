@@ -4,7 +4,7 @@
  * from Exact, or empty. Listing is a GET, so nothing here writes, whatever
  * create or update siblings a tool has.
  *
- * Against a hosted tenant:   MCP_URL=https://exact-mcp.boostu.be/t/<token>/mcp npm run smoke:list
+ * Against a hosted server:   MCP_URL=https://<host>/path/to/mcp npm run smoke:list
  * Against the local server:  set the DIY EXACT_* variables and run without MCP_URL;
  *                            the script starts `node dist/index.js` over stdio.
  */

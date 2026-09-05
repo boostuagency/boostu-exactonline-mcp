@@ -5,7 +5,8 @@
 If you discover a security vulnerability in `boostu-exactonline-mcp`, please report it
 privately. **Do not open a public GitHub issue.**
 
-Email **nick@boostu.be** with:
+Use GitHub's private vulnerability reporting on this repository (Security tab, "Report a
+vulnerability"), or email **nick@boostu.be**, with:
 
 - a description of the issue and its impact,
 - steps to reproduce (a proof of concept if possible),

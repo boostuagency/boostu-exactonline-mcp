@@ -50,6 +50,9 @@ const rotated = data.refresh_token && data.refresh_token !== oldRefresh;
 console.log("regio:", BASE);
 console.log("refresh OK | geroteerd:", rotated ? "JA" : "nee", "| access_token geldig (s):", data.expires_in);
 
+// Exact answers {"d":{"results":[...]}} normally and a bare {"d":[...]} once $top is sent.
+const rowsOf = (body) => (Array.isArray(body?.d) ? body.d : body?.d?.results ?? []);
+
 const authed = (path) =>
   fetch(`${BASE}/api/v1/${path}`, {
     headers: { Authorization: "Bearer " + data.access_token, Accept: "application/json" },
@@ -62,7 +65,7 @@ let division;
 if (!me.ok) {
   console.error("current/Me MISLUKT", me.status, meText);
 } else {
-  const u = JSON.parse(meText).d.results[0];
+  const u = rowsOf(JSON.parse(meText))[0] ?? {};
   division = u.CurrentDivision;
   console.log("current/Me OK | gebruiker:", u.FullName, "| e-mail:", u.Email, "| divisie:", division);
   console.log("rate limit (dag):", me.headers.get("X-RateLimit-Remaining"), "/", me.headers.get("X-RateLimit-Limit"));
@@ -75,7 +78,7 @@ if (division) {
   if (!div.ok) {
     console.error("system/Divisions MISLUKT", div.status, divText);
   } else {
-    const rows = JSON.parse(divText).d.results;
+    const rows = rowsOf(JSON.parse(divText));
     console.log(`divisies (${rows.length}):`);
     for (const d of rows) console.log("  -", d.Code, d.Description, `(${d.Country})`);
   }

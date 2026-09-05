@@ -4,6 +4,39 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Every list tool returned `{"data": []}`.** Exact answers a bare array (`{"d": [...]}`)
+  whenever `$top` is sent and the `results` / `__next` envelope only without it; the client
+  read `d.results` and the list tools always sent `$top`. The client now reads both shapes,
+  `next_skiptoken` comes from `__next` only, and `$top` is sent only when the caller passes
+  `top`.
+- **Default `select` lists named properties Exact does not have**, so calls failed with 400.
+  Every default was validated against the live API; the renamed and removed fields per tool
+  are listed in the pull request that fixed them
+  (boostuagency/boostu-exactonline-mcp#2). Notable renames: `HID` → `Hid` and `Main` →
+  `IsMainDivision` on divisions, `Currency` → `CurrencyCode` on the receivables and payables
+  reports, `ReportingPeriod` / `ReportingYear` → `FinancialPeriod` / `FinancialYear` on
+  general journal entries, `AmountVATDC` → `AmountVATFC` on transaction lines.
+- `validate.mjs` no longer assumes the `results` envelope when listing divisions.
+
+### Added
+
+- `scripts/validate-selects.ts` (`npm run validate:selects`): checks every default `select`
+  against `$metadata`, the live API or the checked-in fixture and exits 1 on any unknown
+  property.
+- `scripts/smoke-list-tools.ts` (`npm run smoke:list`): calls every `*_list` tool with
+  `top: 1` over MCP and reports ok / HTTP error / empty per tool.
+- `test/fixtures/exact-properties.json`: the property names observed on the live API, used by
+  the tests to pin every default select.
+
+### Changed
+
+- The `top` argument is documented as a cap for a one-off answer that disables paging; leave
+  it out to page through everything 60 at a time.
+
 ## [1.0.0] — 2026-09-02
 
 Initial public release: an MCP server for the core of an Exact Online administration,
@@ -50,4 +83,5 @@ aimed at small and medium businesses.
 - Every resource declares a default `select`, so responses stay small unless the caller asks
   for more.
 
+[Unreleased]: https://github.com/boostuagency/boostu-exactonline-mcp/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/boostuagency/boostu-exactonline-mcp/releases/tag/v1.0.0
