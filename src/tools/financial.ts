@@ -9,7 +9,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ExactClient } from "../api/client.js";
 import { registerResources, type ResourceDef } from "../lib/registerResource.js";
 
-const RESOURCES: ResourceDef[] = [
+export const RESOURCES: ResourceDef[] = [
   {
     name: "gl_accounts",
     resource: "financial/GLAccounts",
@@ -28,7 +28,7 @@ const RESOURCES: ResourceDef[] = [
     resource: "financial/GLClassifications",
     label: "statutory classifications ledger accounts map onto",
     ops: ["list"],
-    defaultSelect: "ID,Code,Description,Parent,Scheme,TaxonomyNamespace,Type",
+    defaultSelect: "ID,Code,Name,Description,Parent,TaxonomyNamespace,TaxonomyNamespaceDescription,Type",
   },
   {
     name: "gl_classification_mappings",
@@ -43,8 +43,8 @@ const RESOURCES: ResourceDef[] = [
     label: "journals (day books): sales, purchase, bank, cash and general",
     ops: ["list", "create", "update"],
     defaultSelect:
-      "ID,Code,Description,Type,TypeDescription,GLAccount,GLAccountCode,GLAccountDescription," +
-      "Currency,Bank,PaymentServiceAccountDescription,AllowVAT,IsBlocked",
+      "ID,Code,Description,Type,GLAccount,GLAccountCode,GLAccountDescription,GLAccountType," +
+      "Currency,Bank,BankAccountIBAN,BankAccountDescription,PaymentServiceProviderName,AllowVAT,IsBlocked",
     commonFields: "Code (required), Description (required), Type (10 general, 12 cash, 20 sales, 21 purchase, 22 bank), GLAccount",
     filterHint:
       "Type 10 general journal, 12 cash, 20 sales, 21 purchase, 22 bank. You need the journal Code " +
@@ -56,10 +56,10 @@ const RESOURCES: ResourceDef[] = [
     label: "bookkeeping periods and whether they are open or closed",
     ops: ["list"],
     defaultSelect:
-      "ID,FinYear,FinPeriod,StartDate,EndDate,Code,Description,IsClosed,PeriodClosedForGL," +
-      "PeriodClosedForAP,PeriodClosedForAR",
+      "ID,FinYear,FinPeriod,StartDate,EndDate,Created,Modified",
     filterHint:
-      "Check IsClosed before booking into a period. Filter a year with \"FinYear eq 2026\".",
+      "Filter a year with \"FinYear eq 2026\". Whether a period is still open is not on this " +
+      "resource: use exact_journal_status_list for that.",
   },
   {
     name: "transaction_lines",
@@ -68,7 +68,7 @@ const RESOURCES: ResourceDef[] = [
     ops: ["list"],
     defaultSelect:
       "ID,EntryID,EntryNumber,Date,FinancialYear,FinancialPeriod,JournalCode,JournalDescription," +
-      "GLAccount,GLAccountCode,GLAccountDescription,Description,AmountDC,AmountVATDC,Account," +
+      "GLAccount,GLAccountCode,GLAccountDescription,Description,AmountDC,AmountFC,AmountVATFC,AmountVATBaseFC,Account," +
       "AccountName,Type,Status,InvoiceNumber,YourRef,DueDate,CostCenter,CostUnit,Project,Document",
     filterHint:
       "The workhorse for financial questions. Amounts follow Exact's sign convention: debit positive, " +
@@ -97,8 +97,8 @@ const RESOURCES: ResourceDef[] = [
     ops: ["list", "create", "update"],
     deletable: true,
     defaultSelect:
-      "EntryID,EntryNumber,JournalCode,JournalDescription,Description,EntryDate,ReportingPeriod," +
-      "ReportingYear,Currency,Status,StatusDescription,Created,Modified",
+      "EntryID,EntryNumber,JournalCode,JournalDescription,FinancialPeriod,FinancialYear,Currency," +
+      "Type,TypeDescription,Status,StatusDescription,Reversal,Created,Modified",
     key: "EntryID",
     commonFields:
       "JournalCode (general journal, required), EntryDate, Description, Currency, " +
@@ -120,7 +120,7 @@ const RESOURCES: ResourceDef[] = [
     resource: "financial/ExchangeRates",
     label: "currency exchange rates",
     ops: ["list"],
-    defaultSelect: "ID,SourceCurrency,TargetCurrency,Rate,StartDate,EndDate",
+    defaultSelect: "ID,SourceCurrency,TargetCurrency,Rate,StartDate,Created,Modified",
   },
   {
     name: "currencies",
@@ -129,7 +129,7 @@ const RESOURCES: ResourceDef[] = [
     ops: ["list"],
     key: "Code",
     keyType: "string",
-    defaultSelect: "Code,Description,Main,IsBlocked",
+    defaultSelect: "Code,Description,AmountPrecision,PricePrecision",
   },
 ];
 

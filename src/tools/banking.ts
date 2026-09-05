@@ -10,7 +10,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ExactClient } from "../api/client.js";
 import { registerResources, type ResourceDef } from "../lib/registerResource.js";
 
-const RESOURCES: ResourceDef[] = [
+export const RESOURCES: ResourceDef[] = [
   {
     name: "bank_entries",
     resource: "financialtransaction/BankEntries",
@@ -32,7 +32,7 @@ const RESOURCES: ResourceDef[] = [
     ops: ["list", "create"],
     defaultSelect:
       "ID,EntryID,LineNumber,Date,Description,AmountDC,AmountFC,Account,AccountName,GLAccount," +
-      "GLAccountCode,GLAccountDescription,OffsetID,DocumentNumber,PaymentReference,OurRef,YourRef,Project",
+      "GLAccountCode,GLAccountDescription,OffsetID,DocumentNumber,OurRef,Project",
     commonFields: "EntryID (GUID, required), Date, AmountDC, GLAccount or Account, Description, PaymentReference",
     filterHint: "Filter to one statement with \"EntryID eq guid'...'\". This is where money in and out shows up.",
   },
@@ -60,7 +60,7 @@ const RESOURCES: ResourceDef[] = [
     resource: "cashflow/Banks",
     label: "the banks known to the administration",
     ops: ["list"],
-    defaultSelect: "ID,Code,Name,BICCode,Country",
+    defaultSelect: "ID,BankName,Description,BICCode,Country,Format,Status",
   },
   {
     name: "payment_conditions",
@@ -68,8 +68,8 @@ const RESOURCES: ResourceDef[] = [
     label: "payment terms (due days, discounts, direct debit)",
     ops: ["list"],
     defaultSelect:
-      "ID,Code,Description,DaysBetweenInvoiceAndPayment,PaymentDiscountPercentage," +
-      "PaymentDaysDiscount,PaymentMethod,DirectDebit",
+      "ID,Code,Description,PaymentDays,PaymentEndOfMonths,DiscountPercentage,DiscountPaymentDays," +
+      "PaymentMethod,Percentage",
     filterHint: "Use the Code when setting PaymentCondition on a relation or invoice.",
   },
   {
@@ -78,8 +78,8 @@ const RESOURCES: ResourceDef[] = [
     label: "outgoing payments and their status",
     ops: ["list", "update"],
     defaultSelect:
-      "ID,AccountCode,AccountName,InvoiceNumber,Description,AmountDC,Currency,DueDate,PaymentDate," +
-      "Status,StatusDescription,PaymentMethod,PaymentCondition,YourRef,EntryNumber",
+      "ID,AccountCode,AccountName,InvoiceNumber,Description,AmountDC,TransactionAmountDC,Currency," +
+      "InvoiceDate,DueDate,Status,PaymentMethod,PaymentCondition,PaymentReference,YourRef,EntryNumber",
     commonFields: "PaymentMethod, PaymentDate, Status, PaymentCondition",
     filterHint: "Status 10 open, 20 partly paid, 30 processed, 50 paid.",
   },
@@ -89,8 +89,8 @@ const RESOURCES: ResourceDef[] = [
     label: "incoming payments expected from customers",
     ops: ["list"],
     defaultSelect:
-      "ID,AccountCode,AccountName,InvoiceNumber,Description,AmountDC,Currency,DueDate," +
-      "Status,StatusDescription,PaymentMethod,PaymentCondition,YourRef,EntryNumber",
+      "ID,AccountCode,AccountName,InvoiceNumber,Description,AmountDC,TransactionAmountDC,Currency," +
+      "InvoiceDate,DueDate,Status,IsFullyPaid,LastPaymentDate,PaymentMethod,PaymentCondition,YourRef,EntryNumber",
     filterHint: "The cash-flow view of open sales invoices, alongside exact_receivables_list.",
   },
   {

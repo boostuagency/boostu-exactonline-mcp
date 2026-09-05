@@ -13,7 +13,7 @@ import type { ExactClient } from "../api/client.js";
 import { respond, respondError } from "../lib/respond.js";
 import { isReadOnly, registerResources, type ResourceDef } from "../lib/registerResource.js";
 
-const RESOURCES: ResourceDef[] = [
+export const RESOURCES: ResourceDef[] = [
   {
     name: "documents",
     resource: "documents/Documents",
@@ -56,7 +56,7 @@ const RESOURCES: ResourceDef[] = [
     ops: ["list"],
     key: "ID",
     keyType: "number",
-    defaultSelect: "ID,Description,DocumentIsCreatable,DocumentIsViewable,TypeCategory,TypeCategoryDescription",
+    defaultSelect: "ID,Description,DocumentIsCreatable,DocumentIsViewable,DocumentIsUpdatable,DocumentIsDeletable,TypeCategory",
     filterHint: "You need a Type ID when creating a document; DocumentIsCreatable eq true narrows to usable ones.",
   },
   {
