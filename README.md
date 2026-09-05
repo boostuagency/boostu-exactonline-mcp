@@ -26,14 +26,14 @@ building a report.
 
 > ### Prefer not to self-host?
 > BoostU offers a managed, always-on edition for small and medium businesses at
-> **[exactonline-mcp.boostu.be](https://exactonline-mcp.boostu.be)** — no OAuth setup, no
+> **[exact-mcp.boostu.be](https://exact-mcp.boostu.be)** — no OAuth setup, no
 > token rotation to worry about, and a one-click connector for Claude.
 >
 > This repository is the open-source MCP server itself: run it locally against your own Exact
 > App Center app. The hosted edition adds multi-tenant authentication, a dashboard, usage
 > insights and managed token handling on top of the same server.
 
-| | Self-host (this repo) | Managed ([boostu.be](https://exactonline-mcp.boostu.be)) |
+| | Self-host (this repo) | Managed ([boostu.be](https://exact-mcp.boostu.be)) |
 |---|---|---|
 | **Price** | Free, MIT-licensed | Free preview, then paid |
 | **Setup** | Register your own Exact app, run via `npx` | Copy one connector URL into Claude |
@@ -243,6 +243,10 @@ Everything else follows one shape. A list tool takes `filter`, `select`, `top`, 
 `expand`, `skiptoken` and `count`, mapping straight onto Exact's `$`-parameters, and every
 resource declares a sensible default `select` so responses stay small.
 
+Leave `top` out and Exact pages 60 records at a time: the response carries `next_skiptoken`,
+which the next call passes back as `skiptoken`. Pass `top` only to cap a one-off answer; Exact
+then returns a bare array and no further page.
+
 ---
 
 ## 💬 Example prompts
@@ -287,6 +291,19 @@ npm run build      # emit dist/
 Tests cover the OAuth rotation and concurrency guard, the OData literal and query helpers,
 the client's envelope handling, paging and error shaping, region resolution, and the tool
 registration surface including read-only mode.
+
+Every default `select` is checked against the property names Exact really exposes, because a
+single unknown name makes a whole call fail with 400:
+
+```bash
+npm run validate:selects -- --fixture     # offline, against test/fixtures/exact-properties.json
+npm run validate:selects -- --live        # against your administration (reads .env)
+npm run validate:selects -- --metadata    # against the $metadata document
+npm run smoke:list                        # call every *_list tool with top=1 over MCP
+```
+
+`--live` sends each default select with `$top=1`; Exact names any unknown property in its 400
+response, so empty collections are covered too. `--live --write-fixture` refreshes the fixture.
 
 ---
 

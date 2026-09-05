@@ -43,6 +43,9 @@
   ],
   "author": "BoostU Agency <nick@boostu.be> (https://boostu.be)",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/boostuagency/boostu-exactonline-mcp.git"
@@ -62,6 +65,6 @@
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.11"
   }
 }

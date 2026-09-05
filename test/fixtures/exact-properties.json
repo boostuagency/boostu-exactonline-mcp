@@ -2,7 +2,6 @@
  "$comment": "Property names confirmed on the live Exact Online API. For most resources: one GET <resource>?$top=1 without $select, keys of the first row minus __metadata. For the resources under source.probed the collection was empty, so the names were confirmed by sending them in $select: Exact rejects an unknown name with 400 even on an empty collection, so an accepted select proves every name in it. Regenerate with `npm run validate:selects -- --live --write-fixture`. Unverified resources answered 403 (module not licensed) there; add them when a suitable administration is available.",
  "source": {
   "region": "be",
-  "division": 413770,
   "observed": "2026-09-05",
   "method": "live rows; $select probes for the resources under probed",
   "probed": [

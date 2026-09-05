@@ -15,9 +15,10 @@ Verified against the official resource index at
 | Aspect | Behaviour |
 |--------|-----------|
 | Protocol | OData v3. `GET` lists and reads, `POST` creates, `PUT` updates, `DELETE` removes. |
-| Envelope | Collections return `{"d":{"results":[...],"__next":"..."}}`, single entities `{"d":{...}}`. |
+| Envelope | Collections return `{"d":{"results":[...],"__next":"..."}}`, but `{"d":[...]}` (a bare array, no `__next`) as soon as `$top` is sent. Single entities are `{"d":{...}}`. |
 | JSON | Only when `Accept: application/json` is sent; otherwise Exact answers Atom/XML. |
-| Paging | Server-driven, 60 records per page for normal endpoints and 1000 for `bulk/` and `sync/`. Follow `__next`, or pass its `$skiptoken` back. |
+| Paging | Server-driven, 60 records per page for normal endpoints and 1000 for `bulk/` and `sync/`. Follow `__next`, or pass its `$skiptoken` back. Sending `$top` switches paging off. |
+| `$select` | Property names are case-sensitive and one unknown name fails the whole request with 400, even on an empty collection. `npm run validate:selects` checks every default. |
 | Key access | `crm/Accounts(guid'...')`, `general/Currencies('EUR')`, `system/Divisions(123456)`. |
 | Filters | `$filter` with typed literals: `'text'`, `guid'...'`, `datetime'2026-01-31T00:00:00'`. |
 | Updates | `PUT` and `DELETE` answer `204 No Content` with an empty body. |
