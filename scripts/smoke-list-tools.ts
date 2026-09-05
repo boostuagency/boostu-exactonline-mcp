@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 /**
- * Call every read-only *_list tool with top=1 and report, per tool: ok, an
- * HTTP error from Exact, or empty. Read-only means the tool has no create or
- * update sibling in the same server, so nothing here writes.
+ * Call every *_list tool with top=1 and report, per tool: ok, an HTTP error
+ * from Exact, or empty. Listing is a GET, so nothing here writes, whatever
+ * create or update siblings a tool has.
  *
  * Against a hosted tenant:   MCP_URL=https://exact-mcp.boostu.be/t/<token>/mcp npm run smoke:list
  * Against the local server:  set the DIY EXACT_* variables and run without MCP_URL;
@@ -32,12 +32,7 @@ async function main(): Promise<void> {
   await client.connect(transport);
 
   const { tools } = await client.listTools();
-  const names = new Set(tools.map((t) => t.name));
-  const listTools = tools
-    .map((t) => t.name)
-    .filter((n) => /^exact_.+_list$/.test(n))
-    .filter((n) => { const stem = n.replace(/_list$/, ""); return !names.has(`${stem}_create`) && !names.has(`${stem}_update`); })
-    .sort();
+  const listTools = tools.map((t) => t.name).filter((n) => /^exact_.+_list$/.test(n)).sort();
 
   const outcomes: Outcome[] = [];
   for (const tool of listTools) {
