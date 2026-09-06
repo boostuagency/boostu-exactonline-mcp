@@ -1,5 +1,9 @@
 # 📊 BoostU Exact Online MCP
 
+<p align="center">
+  <img src=".github/social-preview.png" alt="boostU Exact Online MCP: your Exact Online books, in Claude. Open-source Model Context Protocol server with 147 tools." width="800">
+</p>
+
 ### The open-source Exact Online MCP server. Ask your bookkeeping questions in plain language, from Claude and other AI assistants. 🤖
 
 [![CI](https://github.com/boostuagency/boostu-exactonline-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/boostuagency/boostu-exactonline-mcp/actions/workflows/ci.yml)
