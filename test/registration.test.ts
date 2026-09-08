@@ -1,23 +1,31 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const registered: string[] = [];
+type Handler = (args: Record<string, unknown>) => Promise<{ isError?: boolean; content: { text: string }[] }>;
+const handlers = new Map<string, Handler>();
+let serverInfo: { description?: string } = {};
 vi.mock("@modelcontextprotocol/sdk/server/mcp.js", () => {
   return {
     McpServer: class {
-      constructor(_opts: unknown) {}
-      tool(name: string) {
+      constructor(opts: { description?: string }) {
+        serverInfo = opts;
+      }
+      tool(name: string, _description?: string, _schema?: unknown, handler?: Handler) {
         registered.push(name);
+        if (handler) handlers.set(name, handler);
       }
     },
   };
 });
 
 /** Re-import server.ts with a clean module cache so env changes take effect. */
-async function register(): Promise<string[]> {
+async function register(options?: unknown): Promise<string[]> {
   vi.resetModules();
   registered.length = 0;
+  handlers.clear();
+  serverInfo = {};
   const { createServer } = await import("../src/server.js");
-  createServer({} as never);
+  createServer({} as never, options as never);
   return [...registered];
 }
 
@@ -106,5 +114,70 @@ describe("createServer", () => {
   it("registers no duplicate tool names", async () => {
     const tools = await register();
     expect(new Set(tools).size).toBe(tools.length);
+  });
+});
+
+/**
+ * A host that serves several tenants from one process cannot express the tool
+ * surface through process.env, so createServer takes it as options. These pin
+ * that the options win over the environment in both directions.
+ */
+describe("createServer options", () => {
+  beforeEach(() => {
+    delete process.env.EXACT_TOOLS;
+    delete process.env.EXACT_READ_ONLY;
+  });
+  afterEach(() => {
+    delete process.env.EXACT_TOOLS;
+    delete process.env.EXACT_READ_ONLY;
+  });
+
+  it("readOnly true drops every write tool even with the environment unset", async () => {
+    const tools = await register({ readOnly: true });
+    expect(tools).toContain("exact_accounts_list");
+    expect(tools).not.toContain("exact_accounts_create");
+    expect(tools).not.toContain("exact_accounts_update");
+    expect(tools).not.toContain("exact_record_delete");
+    expect(tools).not.toContain("exact_sales_invoice_print");
+    expect(tools).not.toContain("exact_document_attachment_add");
+  });
+
+  it("readOnly false restores the write tools even when EXACT_READ_ONLY is set", async () => {
+    process.env.EXACT_READ_ONLY = "true";
+    const tools = await register({ readOnly: false });
+    expect(tools).toContain("exact_accounts_create");
+    expect(tools).toContain("exact_record_delete");
+  });
+
+  it("omitting readOnly leaves the environment in charge", async () => {
+    process.env.EXACT_READ_ONLY = "true";
+    expect(await register({})).not.toContain("exact_accounts_create");
+    expect(await register()).not.toContain("exact_accounts_create");
+  });
+
+  it("announces read-only mode in the server description", async () => {
+    await register({ readOnly: true });
+    expect(serverInfo.description).toContain("read-only");
+    await register({ readOnly: false });
+    expect(serverInfo.description).not.toContain("read-only");
+  });
+
+  it("tools restricts the groups, and null means every group", async () => {
+    process.env.EXACT_TOOLS = "system";
+    const reports = await register({ tools: ["reports"] });
+    expect(reports).toContain("exact_receivables_list");
+    expect(reports).not.toContain("exact_accounts_list");
+
+    const all = await register({ tools: null });
+    expect(all).toContain("exact_accounts_list");
+    expect(all).toContain("exact_receivables_list");
+  });
+
+  it("refuses a write method through the exact_request escape hatch when read-only", async () => {
+    await register({ readOnly: true });
+    const request = handlers.get("exact_request")!;
+    const res = await request({ resource: "crm/Accounts", method: "POST", body: { Name: "x" } });
+    expect(res.isError).toBe(true);
+    expect(res.content[0].text).toContain("read-only");
   });
 });

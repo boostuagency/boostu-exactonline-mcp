@@ -72,11 +72,35 @@ export function isReadOnly(env: string | undefined = process.env.EXACT_READ_ONLY
   return /^(1|true|yes|on)$/i.test((env ?? "").trim());
 }
 
-export function registerResource(server: McpServer, client: ExactClient, def: ResourceDef): void {
+/**
+ * Per-server overrides for the tool surface.
+ *
+ * A host that serves several tenants from one process cannot express "this
+ * connection reads, that one writes" through the environment, because
+ * process.env is shared. Passing the decision in makes the caller the
+ * authority; leaving it out keeps the environment in charge, which is what a
+ * single-tenant stdio server wants.
+ */
+export interface ToolOptions {
+  /** Register read tools only. Defaults to EXACT_READ_ONLY from the environment. */
+  readOnly?: boolean;
+}
+
+/** The effective read-only decision: the explicit option, else the environment. */
+export function readOnlyFrom(options?: ToolOptions): boolean {
+  return options?.readOnly ?? isReadOnly();
+}
+
+export function registerResource(
+  server: McpServer,
+  client: ExactClient,
+  def: ResourceDef,
+  options?: ToolOptions
+): void {
   const key = def.key ?? "ID";
   const keyType = def.keyType ?? "guid";
   const keyed = def.keyed !== false;
-  const readOnly = isReadOnly();
+  const readOnly = readOnlyFrom(options);
   const ops = readOnly ? def.ops.filter((op) => op === "list") : def.ops;
 
   if (ops.includes("list")) {
@@ -201,7 +225,8 @@ export function registerResource(server: McpServer, client: ExactClient, def: Re
 export function registerResources(
   server: McpServer,
   client: ExactClient,
-  defs: ResourceDef[]
+  defs: ResourceDef[],
+  options?: ToolOptions
 ): void {
-  for (const def of defs) registerResource(server, client, def);
+  for (const def of defs) registerResource(server, client, def, options);
 }

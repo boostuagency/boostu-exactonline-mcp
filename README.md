@@ -251,6 +251,20 @@ Leave `top` out and Exact pages 60 records at a time: the response carries `next
 which the next call passes back as `skiptoken`. Pass `top` only to cap a one-off answer; Exact
 then returns a bare array and no further page.
 
+Both settings can also be passed per server instead of through the environment, which is what
+a host that serves several tenants from one process needs:
+
+```typescript
+import { createServer } from "boostu-exactonline-mcp/dist/server.js";
+
+// This tenant reads; another one in the same process can write.
+const server = createServer(client, { readOnly: true, tools: ["system", "reports"] });
+```
+
+`readOnly` and `tools` default to `EXACT_READ_ONLY` and `EXACT_TOOLS`, so a plain
+`createServer(client)` behaves exactly as before. When `readOnly` is on, no write tool is
+registered at all and `exact_request` refuses every method but `GET`.
+
 ---
 
 ## 💬 Example prompts

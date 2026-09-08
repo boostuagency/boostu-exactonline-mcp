@@ -11,7 +11,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { ExactClient } from "../api/client.js";
 import { respond, respondError } from "../lib/respond.js";
-import { registerResources, type ResourceDef } from "../lib/registerResource.js";
+import { registerResources, type ResourceDef, type ToolOptions } from "../lib/registerResource.js";
 
 export const RESOURCES: ResourceDef[] = [
   {
@@ -118,8 +118,8 @@ export const RESOURCES: ResourceDef[] = [
 export const OVERDUE_SELECT =
   "HID,AccountId,AccountCode,AccountName,InvoiceNumber,YourRef,Description,InvoiceDate,DueDate,Amount,CurrencyCode";
 
-export function registerReportTools(server: McpServer, client: ExactClient): void {
-  registerResources(server, client, RESOURCES);
+export function registerReportTools(server: McpServer, client: ExactClient, options?: ToolOptions): void {
+  registerResources(server, client, RESOURCES, options);
 
   server.tool(
     "exact_overdue_receivables",

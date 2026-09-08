@@ -8,7 +8,7 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ExactClient } from "../api/client.js";
-import { registerResources, type ResourceDef } from "../lib/registerResource.js";
+import { registerResources, type ResourceDef, type ToolOptions } from "../lib/registerResource.js";
 
 export const RESOURCES: ResourceDef[] = [
   {
@@ -44,6 +44,6 @@ export const RESOURCES: ResourceDef[] = [
   },
 ];
 
-export function registerVatTools(server: McpServer, client: ExactClient): void {
-  registerResources(server, client, RESOURCES);
+export function registerVatTools(server: McpServer, client: ExactClient, options?: ToolOptions): void {
+  registerResources(server, client, RESOURCES, options);
 }
