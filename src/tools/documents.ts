@@ -11,7 +11,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { ExactClient } from "../api/client.js";
 import { respond, respondError } from "../lib/respond.js";
-import { isReadOnly, registerResources, type ResourceDef } from "../lib/registerResource.js";
+import { readOnlyFrom, registerResources, type ResourceDef, type ToolOptions } from "../lib/registerResource.js";
 
 export const RESOURCES: ResourceDef[] = [
   {
@@ -68,9 +68,9 @@ export const RESOURCES: ResourceDef[] = [
   },
 ];
 
-export function registerDocumentTools(server: McpServer, client: ExactClient): void {
-  registerResources(server, client, RESOURCES);
-  if (isReadOnly()) return;
+export function registerDocumentTools(server: McpServer, client: ExactClient, options?: ToolOptions): void {
+  registerResources(server, client, RESOURCES, options);
+  if (readOnlyFrom(options)) return;
 
   server.tool(
     "exact_document_attachment_add",

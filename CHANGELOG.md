@@ -24,6 +24,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- **`createServer(client, options)`** takes the tool surface as options: `readOnly` and
+  `tools` override `EXACT_READ_ONLY` and `EXACT_TOOLS` when given, and fall back to them when
+  omitted. A host that serves several tenants from one process could not express "this
+  connection reads, that one writes" before, because `process.env` is shared. The registrars
+  and `registerResource` take the same options, and `exact_request` refuses every method but
+  `GET` on a read-only server.
 - `scripts/validate-selects.ts` (`npm run validate:selects`): checks every default `select`
   against `$metadata`, the live API or the checked-in fixture and exits 1 on any unknown
   property.

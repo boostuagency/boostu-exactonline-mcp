@@ -14,7 +14,7 @@ import { collectionRows, type ODataCollection, type Me } from "../types/index.js
 /** Properties exact_me asks current/Me for. Exported so the select validator covers it. */
 export const ME_SELECT = "UserID,FullName,Email,LanguageCode,CurrentDivision,AccountingDivision,ServerTime,PackageCode";
 import { respond, respondError } from "../lib/respond.js";
-import { isReadOnly, registerResources, type ResourceDef } from "../lib/registerResource.js";
+import { readOnlyFrom, registerResources, type ResourceDef, type ToolOptions } from "../lib/registerResource.js";
 
 export const RESOURCES: ResourceDef[] = [
   {
@@ -59,7 +59,11 @@ export const RESOURCES: ResourceDef[] = [
   },
 ];
 
-export function registerSystemTools(server: McpServer, client: ExactClient): void {
+export function registerSystemTools(server: McpServer, client: ExactClient, options?: ToolOptions): void {
+  // Read once: the surface a server exposes must not change between the tools
+  // it advertises and the calls it later accepts.
+  const readOnly = readOnlyFrom(options);
+
   server.tool(
     "exact_me",
     "Show the authenticated Exact Online user and the division (administration) the connection " +
@@ -145,10 +149,10 @@ export function registerSystemTools(server: McpServer, client: ExactClient): voi
     async (p) => {
       try {
         const method = p.method ?? "GET";
-        if (method !== "GET" && isReadOnly()) {
+        if (method !== "GET" && readOnly) {
           return respondError(
-            `EXACT_READ_ONLY is enabled, so ${method} requests are refused. ` +
-              "Unset it to allow writes."
+            `This connection is read-only, so ${method} requests are refused. ` +
+              "Only GET is allowed."
           );
         }
         return respond(
@@ -167,7 +171,7 @@ export function registerSystemTools(server: McpServer, client: ExactClient): voi
     }
   );
 
-  if (!isReadOnly()) {
+  if (!readOnly) {
     server.tool(
       "exact_record_delete",
       "Permanently delete one record from Exact Online. This cannot be undone and, for accounting " +
@@ -205,7 +209,7 @@ export function registerSystemTools(server: McpServer, client: ExactClient): voi
     );
   }
 
-  registerResources(server, client, RESOURCES);
+  registerResources(server, client, RESOURCES, options);
 }
 
 /** Infer the OData literal type of a primary key from its shape. */
