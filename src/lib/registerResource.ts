@@ -186,7 +186,7 @@ export function registerResource(
         " Pass the Exact property names exactly as documented.",
       {
         fields: z
-          .record(z.unknown())
+          .record(z.string(), z.unknown())
           .describe("Object of Exact property names and values, e.g. { \"Name\": \"Acme BV\", \"Status\": \"C\" }"),
         division: divisionParam,
       },
@@ -207,7 +207,7 @@ export function registerResource(
         (def.commonFields ? `Common fields: ${def.commonFields}.` : ""),
       {
         id: z.string().describe(`The ${key} of the record to update`),
-        fields: z.record(z.unknown()).describe("Object of Exact property names and their new values"),
+        fields: z.record(z.string(), z.unknown()).describe("Object of Exact property names and their new values"),
         division: divisionParam,
       },
       async (p) => {
