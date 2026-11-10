@@ -132,10 +132,10 @@ export function registerSystemTools(server: McpServer, client: ExactClient, opti
         .optional()
         .describe("HTTP method (default GET)"),
       params: z
-        .record(z.string())
+        .record(z.string(), z.string())
         .optional()
         .describe("Query parameters including the $ prefix, e.g. { \"$select\": \"ID,Name\", \"$top\": \"10\" }"),
-      body: z.record(z.unknown()).optional().describe("JSON body for POST and PUT"),
+      body: z.record(z.string(), z.unknown()).optional().describe("JSON body for POST and PUT"),
       divisionless: z
         .boolean()
         .optional()
